@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Input file with isbn on each line
+
+# Check if ol is installed
+# Use ol to get book info from isbn
+info=$(ol --get-book --isbn "$1")
+
+# Check if jq is installed
+# Modify output
+echo "$info" | jq .authors.[].name,.title,.copyright_date >/tmp/test
+
+tr '\n' ' ' </tmp/test
+
+# Sort all entries of
