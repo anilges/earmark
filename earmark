@@ -2,13 +2,25 @@
 
 input="$1"
 
-# TODO Check if ol is installed
-# TODO Check if jq is installed
+is_installed() {
+  local a=$1
+  if ! command -v "$a" &>/dev/null; then
+    echo "$a could not be found"
+    exit 1
+  fi
+}
+
+# Check if ol is installed
+is_installed ol
+# Check if jq is installed
+is_installed jq
+
 # Use ol to get book info from isbn
 out() {
   local a=$1
   info=$(ol --get-book --isbn "$a")
-  echo "$info" | jq .authors.[].name,.title,.copyright_date | tr '\n' ',' | sed '$s/,$/\n/' >>/tmp/test
+  # TODO if some of the searched json values is empty return null instead of nothing
+  echo "$info" | jq .authors.[].name,.title,.copyright_date | tr '\n' ',' | sed '$s/,$/\n/' | tr -d '"' >>/tmp/test
 }
 
 while IFS= read -r line; do
@@ -16,7 +28,9 @@ while IFS= read -r line; do
   sleep 0.01
 done <"$input"
 
-# TODO Sort all entries of Input file with isbn on each line
+# Sort output
+#sort -t, -k3,3 /tmp/test
 
 cat /tmp/test
+# for testing
 rm /tmp/test
